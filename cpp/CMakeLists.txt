@@ -118,7 +118,7 @@ rapids_cpm_init()
 message(STATUS "RAFT: Overriding RMM settings to download fil-backend-2203 tag.")
 message(STATUS "RAFT: Fixing libcudacxx and Thrust versions.")
 include(${rapids-cmake-dir}/cpm/package_override.cmake)
-rapids_cpm_package_override(${CMAKE_CURRENT_SOURCE_DIR}/cmake/override_cpm.json)
+rapids_cpm_package_override(${CMAKE_CURRENT_SOURCE_DIR}/cmake/versions.json)
 
 # thrust before rmm/cuco so we get the right version of thrust/cub
 include(cmake/thirdparty/get_thrust.cmake)
