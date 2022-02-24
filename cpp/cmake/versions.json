@@ -5,7 +5,7 @@
         "git_url" : "https://github.com/NVIDIA/thrust.git",
         "git_tag" : "${version}"
     },
-      "RMM" : {
+      "rmm" : {
         "version" : "22.04",
         "git_url" : "https://github.com/rapidsai/rmm.git",
         "git_tag" : "d8dc71501657e820078bc26843565990d8052533"
