@@ -4,6 +4,16 @@
         "version" : "1.15.0",
         "git_url" : "https://github.com/NVIDIA/thrust.git",
         "git_tag" : "${version}"
+    },
+      "RMM" : {
+        "version" : "22.04",
+        "git_url" : "https://github.com/rapidsai/rmm.git",
+        "git_tag" : "d8dc71501657e820078bc26843565990d8052533"
+    },
+      "libcudacxx" : {
+        "version" : "1.8.0",
+        "git_url" : "https://github.com/NVIDIA/libcudacxx",
+        "git_tag" : "c17d04a07967ba904d3c4a5e11170024d47f9bcb"
     }
   }
 }
