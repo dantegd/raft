@@ -61,5 +61,5 @@ RAFT_INST_SERIALIZE(float);
 RAFT_INST_SERIALIZE(int8_t);
 RAFT_INST_SERIALIZE(uint8_t);
 
-#undef RAFT_INST_SERIALIZE::cagra
+#undef RAFT_INST_SERIALIZE
 }  // namespace raft::runtime::neighbors::experimental::cagra
