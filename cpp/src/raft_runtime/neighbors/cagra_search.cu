@@ -31,9 +31,9 @@ namespace raft::runtime::neighbors::experimental::cagra {
       handle, params, index, queries, neighbors, distances);                                   \
   }
 
-RAFT_INST_CAGRA_SEARCH(float, int64_t);
-RAFT_INST_CAGRA_SEARCH(int8_t, int64_t);
-RAFT_INST_CAGRA_SEARCH(uint8_t, int64_t);
+RAFT_INST_CAGRA_SEARCH(float, uint32_t);
+RAFT_INST_CAGRA_SEARCH(int8_t, uint32_t);
+RAFT_INST_CAGRA_SEARCH(uint8_t, uint32_t);
 
 #undef RAFT_INST_CAGRA_SEARCH
 
