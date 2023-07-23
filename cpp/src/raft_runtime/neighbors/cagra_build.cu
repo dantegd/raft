@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
+#include <raft/neighbors/ivf_pq.cuh>
+#include <raft/neighbors/ivf_pq_types.hpp>
 #include <raft/neighbors/cagra.cuh>
 #include <raft_runtime/neighbors/cagra.hpp>
 
 namespace raft::runtime::neighbors::experimental::cagra {
 
-#define RAFT_INST_CAGRA_BUILD(T, IdxT)                                                         \
+#define RAFT_INST_CAGRA_BUILD(T, IdxT, Accessor)                                                         \
   void build_knn_graph(raft::resources const& handle,                                          \
-                     mdspan<const DataT, matrix_extent<IdxT>, row_major, accessor> dataset,    \
+                     mdspan<const T, matrix_extent<IdxT>, row_major, Accessor> dataset,    \
                      raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph,                  \
                      std::optional<float> refine_rate,                                         \
-                     std::optional<ivf_pq::index_params> build_params,                         \
-                     std::optional<ivf_pq::search_params> search_params)                       \
+                     std::optional<raft::neighbors::ivf_pq::index_params> build_params,                         \
+                     std::optional<raft::neighbors::ivf_pq::search_params> search_params)                       \
   {                                                                                            \
     raft::neighbors::experimental::cagra::build_knn_graph<T, IdxT>(handle,                     \
                                                                    dataset,                    \
@@ -33,24 +35,6 @@ namespace raft::runtime::neighbors::experimental::cagra {
                                                                    refine_rate,                \
                                                                    build_params,               \
                                                                    search_params);             \
-  }                                                                                            \
-                                                                                               \
-  void sort_knn_graph(raft::resources const& handle,                                           \
-                      mdspan<const DataT, matrix_extent<IdxT>, row_major, d_accessor> dataset, \
-                      mdspan<IdxT, matrix_extent<IdxT>, row_major, g_accessor> knn_graph)      \
-  {                                                                                            \
-    raft::neighbors::experimental::cagra::sort_knn_graph<T, IdxT>(handle,                      \
-                                                                  dataset,                     \
-                                                                  knn_graph);                  \
-  }                                                                                            \
-                                                                                               \
-  void optimize(raft::resources const& handle,                                                 \
-                mdspan<IdxT, matrix_extent<IdxT>, row_major, g_accessor> knn_graph,            \
-                raft::host_matrix_view<IdxT, IdxT, row_major> new_graph)                       \
-  {                                                                                            \
-    raft::neighbors::experimental::cagra::optimize<T, IdxT>(handle,                            \
-                                                            knn_graph,                         \
-                                                            new_graph);                        \
   }                                                                                            \
                                                                                                \
   auto build(raft::resources const& handle,                                                    \
@@ -61,10 +45,46 @@ namespace raft::runtime::neighbors::experimental::cagra {
     return raft::neighbors::experimental::cagra::build<T, IdxT>(handle, params, dataset);      \
   }
 
-RAFT_INST_CAGRA_BUILD(float, int64_t);
-RAFT_INST_CAGRA_BUILD(int8_t, int64_t);
-RAFT_INST_CAGRA_BUILD(uint8_t, int64_t);
+RAFT_INST_CAGRA_BUILD(float, uint32_t,
+                      host_device_accessor<std::experimental::default_accessor<DataT>, memory_type::device>);
+RAFT_INST_CAGRA_BUILD(int8_t, uint32_t,
+                      host_device_accessor<std::experimental::default_accessor<DataT>, memory_type::device>);
+RAFT_INST_CAGRA_BUILD(uint8_t, uint32_t,
+                      host_device_accessor<std::experimental::default_accessor<DataT>, memory_type::device>);
+
+RAFT_INST_CAGRA_BUILD(float, uint32_t,
+                      host_device_accessor<std::experimental::default_accessor<IdxT>, memory_type::host>>);
+RAFT_INST_CAGRA_BUILD(int8_t, uint32_t,
+                      host_device_accessor<std::experimental::default_accessor<IdxT>, memory_type::host>>);
+RAFT_INST_CAGRA_BUILD(uint8_t, uint32_t,
+                      host_device_accessor<std::experimental::default_accessor<IdxT>, memory_type::host>>);
 
 #undef RAFT_INST_CAGRA_BUILD
+
+#define RAFT_INST_CAGRA_SORT_OPT(T, IdxT)
+void sort_knn_graph(raft::resources const& handle,                                           \
+                      mdspan<const T, matrix_extent<IdxT>, row_major> dataset, \
+                      mdspan<IdxT, matrix_extent<IdxT>, row_major> knn_graph)      \
+  {                                                                                            \
+    raft::neighbors::experimental::cagra::sort_knn_graph<T, IdxT>(handle,                      \
+                                                                  dataset,                     \
+                                                                  knn_graph);                  \
+  }                                                                                            \
+                                                                                               \
+  void optimize(raft::resources const& handle,                                                 \
+                mdspan<IdxT, matrix_extent<IdxT>, row_major> knn_graph,            \
+                raft::host_matrix_view<IdxT, IdxT, row_major> new_graph)                       \
+  {                                                                                            \
+    raft::neighbors::experimental::cagra::optimize<T, IdxT>(handle,                            \
+                                                            knn_graph,                         \
+                                                            new_graph);                        \
+  }
+
+RAFT_INST_CAGRA_SORT_OPT(float, int64_t);
+RAFT_INST_CAGRA_SORT_OPT(int8_t, int64_t);
+RAFT_INST_CAGRA_SORT_OPT(uint8_t, int64_t);
+
+
+#undef RAFT_INST_CAGRA_SORT_OPT
 
 }  // namespace raft::runtime::neighbors::experimental::cagra
