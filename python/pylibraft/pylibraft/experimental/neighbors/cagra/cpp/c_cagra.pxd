@@ -23,7 +23,7 @@ import numpy as np
 import pylibraft.common.handle
 
 from cython.operator cimport dereference as deref
-from libc.stdint cimport int8_t, uint8_t, uint32_t
+from libc.stdint cimport int8_t, uint8_t, uint32_t, uint64_t
 from libcpp cimport bool, nullptr
 from libcpp.string cimport string
 
@@ -32,6 +32,7 @@ from rmm._lib.memory_resource cimport device_memory_resource
 from pylibraft.common.cpp.mdspan cimport (
     device_matrix_view,
     device_vector_view,
+    host_matrix_view,
     row_major,
 )
 from pylibraft.common.handle cimport device_resources
@@ -54,15 +55,15 @@ cdef extern from "raft/neighbors/cagra_types.hpp" \
         size_t graph_degree
 
     ctypedef enum search_algo:
-        SINGLE_CTA "raft::neighbors::experimental::cagra::SINGLE_CTA",
-        MULTI_CTA "raft::neighbors::experimental::cagra::MULTI_CTA",
-        MULTI_KERNEL "raft::neighbors::experimental::cagra::MULTI_KERNEL",
-        AUTO "raft::neighbors::experimental::cagra::AUTO"
+        SINGLE_CTA "raft::neighbors::experimental::cagra::search_algo::SINGLE_CTA",
+        MULTI_CTA "raft::neighbors::experimental::cagra::search_algo::MULTI_CTA",
+        MULTI_KERNEL "raft::neighbors::experimental::cagra::search_algo::MULTI_KERNEL",
+        AUTO "raft::neighbors::experimental::cagra::search_algo::AUTO"
 
     ctypedef enum hash_mode:
-        HASH "raft::neighbors::experimental::cagra::HASH",
-        SMALL "raft::neighbors::experimental::cagra::SMALL",
-        AUTO "raft::neighbors::experimental::cagra::AUTO",
+        HASH "raft::neighbors::experimental::cagra::hash_mode::HASH",
+        SMALL "raft::neighbors::experimental::cagra::hash_mode::SMALL",
+        AUTO "raft::neighbors::experimental::cagra::hash_mode::AUTO"
 
     cpdef cppclass search_params(ann_search_params):
         size_t max_queries
@@ -79,15 +80,15 @@ cdef extern from "raft/neighbors/cagra_types.hpp" \
         uint32_t num_random_samplings
         uint64_t rand_xor_mask
 
-    cdef cppclass index[IdxT](ann_index):
+    cdef cppclass index[T, IdxT](ann_index):
         index(const device_resources&)
 
         DistanceType metric()
         IdxT size()
         uint32_t dim()
         uint32_t graph_degree()
-        device_matrix_view[IdxT, IdxT, row_major] dataset()
-        device_matrix_view[IdxT, IdxT, row_major] graph()
+        device_matrix_view[T, IdxT, row_major] dataset()
+        device_matrix_view[T, IdxT, row_major] graph()
 
 cdef extern from "raft_runtime/neighbors/cagra.hpp" \
         namespace "raft::runtime::neighbors::experimental::cagra" nogil:
@@ -179,15 +180,11 @@ cdef extern from "raft_runtime/neighbors/cagra.hpp" \
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
     cdef void sort_knn_graph(const device_resources&,
-                             device_matrix_view[float, uint32_t, row_major] dataset,
+                             device_matrix_view[int8_t, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
     cdef void sort_knn_graph(const device_resources&,
-                             device_matrix_view[float, uint32_t, row_major] dataset,
-                             host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
-
-    cdef void sort_knn_graph(const device_resources&,
-                             host_matrix_view[float, uint32_t, row_major] dataset,
+                             device_matrix_view[uint8_t, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
     cdef void sort_knn_graph(const device_resources&,
@@ -195,7 +192,11 @@ cdef extern from "raft_runtime/neighbors/cagra.hpp" \
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
     cdef void sort_knn_graph(const device_resources&,
-                             host_matrix_view[float, uint32_t, row_major] dataset,
+                             host_matrix_view[int8_t, uint32_t, row_major] dataset,
+                             host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
+
+    cdef void sort_knn_graph(const device_resources&,
+                             host_matrix_view[uint8_t, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
     cdef void search(
