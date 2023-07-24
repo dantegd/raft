@@ -88,7 +88,7 @@ cdef class IndexParams:
     def __init__(self, *,
                  metric="sqeuclidean",
                  intermediate_graph_degree=128,
-                 graph_degree=64
+                 graph_degree=64,
                  add_data_on_build=True):
         """"
         Parameters to build index for IVF-PQ nearest neighbor search
@@ -469,10 +469,10 @@ cdef class SearchParams:
                  min_iterations=0,
                  thread_block_size=0,
                  hashmap_mode=AUTO,
-                 hashmap_min_bitlen= ,
-                 hashmap_max_fill_rate= ,
-                 num_random_samplings= ,
-                 rand_xor_mask= ):
+                 hashmap_min_bitlen=0,
+                 hashmap_max_fill_rate=0.5,
+                 num_random_samplings=1,
+                 rand_xor_mask=0x128394):
         """
         CAGRA search parameters
 

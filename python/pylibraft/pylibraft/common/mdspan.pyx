@@ -30,6 +30,7 @@ from libc.stdint cimport int8_t, int32_t, int64_t, uint8_t, uint32_t, uintptr_t
 from pylibraft.common.cpp.mdspan cimport (
     col_major,
     device_matrix_view,
+    host_matrix_view,
     host_mdspan,
     make_device_matrix_view,
     make_host_matrix_view,
