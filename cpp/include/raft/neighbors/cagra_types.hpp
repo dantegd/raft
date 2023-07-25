@@ -309,7 +309,7 @@ struct index : ann::index {
                    mdspan<const T, matrix_extent<IdxT>, row_major, data_accessor> dataset)
   {
     size_t padded_dim = round_up_safe<size_t>(dataset.extent(1) * sizeof(T), 16) / sizeof(T);
-    dataset_          = make_device_matrix<T, int64_t>(res, dataset.extent(0), padded_dim);
+    dataset_          = make_device_matrix<T, uint32_t>(res, dataset.extent(0), padded_dim);
     if (dataset_.extent(1) == dataset.extent(1)) {
       raft::copy(dataset_.data_handle(),
                  dataset.data_handle(),

@@ -17,7 +17,6 @@
 #pragma once
 
 #include <raft/neighbors/cagra_types.hpp>
-#include <raft/neighbors/ivf_pq.cuh>
 #include <raft/neighbors/ivf_pq_types.hpp>
 #include <string>
 
@@ -39,12 +38,12 @@ namespace raft::runtime::neighbors::experimental::cagra {
              raft::host_matrix_view<const T, IdxT, row_major> dataset)                       \
     ->raft::neighbors::experimental::cagra::index<T, IdxT>;                                  \
                                                                                              \
-  void build(raft::resources const& handle,                                                  \
+  void build_device(raft::resources const& handle,                                           \
              const raft::neighbors::experimental::cagra::index_params& params,               \
              raft::device_matrix_view<const T, IdxT, row_major> dataset,                     \
              raft::neighbors::experimental::cagra::index<T, IdxT>& idx);                     \
                                                                                              \
-  void build(raft::resources const& handle,                                                  \
+  void build_host(raft::resources const& handle,                                             \
              const raft::neighbors::experimental::cagra::index_params& params,               \
              raft::host_matrix_view<const T, IdxT, row_major> dataset,                       \
              raft::neighbors::experimental::cagra::index<T, IdxT>& idx);                     \
@@ -63,13 +62,13 @@ namespace raft::runtime::neighbors::experimental::cagra {
                        std::optional<raft::neighbors::ivf_pq::index_params> build_params,    \
                        std::optional<raft::neighbors::ivf_pq::search_params> search_params); \
                                                                                              \
-  void sort_knn_graph(raft::resources const& handle,                                         \
-                      raft::device_matrix_view<const T, IdxT, row_major> dataset,            \
-                      raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph);              \
+  void sort_knn_graph_device(raft::resources const& handle,                                  \
+                             raft::device_matrix_view<const T, IdxT, row_major> dataset,     \
+                             raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph);       \
                                                                                              \
-  void sort_knn_graph(raft::resources const& handle,                                         \
-                      raft::host_matrix_view<const T, IdxT, row_major> dataset,              \
-                      raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph);              \
+  void sort_knn_graph_host(raft::resources const& handle,                                    \
+                           raft::host_matrix_view<const T, IdxT, row_major> dataset,         \
+                           raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph);         \
                                                                                              \
   void search(raft::resources const& handle,                                                 \
               raft::neighbors::experimental::cagra::search_params const& params,             \

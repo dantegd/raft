@@ -84,9 +84,14 @@ from pylibraft.common.mdspan cimport (
     make_optional_view_int64,
 )
 from pylibraft.neighbors.common cimport _get_metric_string
+from pylibraft.neighbors.ivf_pq import (
+    IndexParams as IVFPQ_IndexParams,
+    SearchParams as IVFPQ_SearchParams
+)
+
 from pylibraft.neighbors.ivf_pq.cpp.c_ivf_pq cimport (
-    index_params as ivfpq_ip,
-    search_params as ivfpq_sp,
+    index_params as IVFPQ_IP,
+    search_params as IVFPQ_SP,
 )
 
 
@@ -235,164 +240,167 @@ cdef class IndexUint8(Index):
             del self.index
 
 
-@auto_sync_handle
-def build_knn_graph(dataset, knn_graph,
-                    build_params=None,
-                    search_params=None, refine_rate=0, handle=None):
-    """
-    Build a kNN graph, the first building block for a CAGRA index.
+# @auto_sync_handle
+# def build_knn_graph(dataset, knn_graph,
+#                     IndexParams index_params,
+#                     build_params=None,
+#                     search_params=None,
+#                     refine_rate=0,
+#                     handle=None):
+#     """
+#     Build a kNN graph, the first building block for a CAGRA index.
 
-    This function uses the IVF-PQ method to build a kNN graph. The output is
-    a dense matrix that stores the neighbor indices for each point
-    in the dataset. Each point has the same number of neighbors.
+#     This function uses the IVF-PQ method to build a kNN graph. The output is
+#     a dense matrix that stores the neighbor indices for each point
+#     in the dataset. Each point has the same number of neighbors.
 
-    Use pylibraft.experimental.cagra.build for an alternative, single function
-    method for building a CAGRA index.
+#     Use pylibraft.experimental.cagra.build for an alternative, single function
+#     method for building a CAGRA index.
 
-    The following distance metrics are supported:
-    - L2Expanded
+#     The following distance metrics are supported:
+#     - L2Expanded
 
-    Parameters
-    ----------
-    handle:
-        RAFT resources
-    dataset: array interface compliant matrix shape (n_samples, dim)
-        a host or device matrix, Supported dtype [float, int8, uint8]/
-    knn_graph: array interface compliant matrix shape (n_samples, dim)
-        a host matrix view to store the output knn graph [n_rows, graph_degree]
-    refine_rate: float
-        refinement rate for ivf-pq search
-    build_params:
-         ivf_pq index building parameters for knn graph
-    search_params:
-        ivf_pq search parameters
-    {handle_docstring}
+#     Parameters
+#     ----------
+#     handle:
+#         RAFT resources
+#     dataset: array interface compliant matrix shape (n_samples, dim)
+#         a host or device matrix, Supported dtype [float, int8, uint8]/
+#     knn_graph: array interface compliant matrix shape (n_samples, dim)
+#         a host matrix view to store the output knn graph [n_rows, graph_degree]
+#     refine_rate: float
+#         refinement rate for ivf-pq search
+#     build_params:
+#          ivf_pq index building parameters for knn graph
+#     search_params:
+#         ivf_pq search parameters
+#     {handle_docstring}
 
-    Returns
-    -------
-    index: ivf_pq.Index
+#     Returns
+#     -------
+#     index: ivf_pq.Index
 
-    Examples
-    --------
+#     Examples
+#     --------
 
-    >>> import cupy as cp
+#     >>> import cupy as cp
 
-    >>> from pylibraft.common import DeviceResources
-    >>> from pylibraft.experimental.neighbors import cagra
+#     >>> from pylibraft.common import DeviceResources
+#     >>> from pylibraft.experimental.neighbors import cagra
 
-    >>> # pylibraft functions are often asynchronous so the
-    >>> # handle needs to be explicitly synchronized
-    >>> handle.sync()
-    """
-    if handle is None:
-        handle = DeviceResources()
-    cdef device_resources* handle_ = \
-        <device_resources*><size_t>handle.getHandle()
+#     >>> # pylibraft functions are often asynchronous so the
+#     >>> # handle needs to be explicitly synchronized
+#     >>> handle.sync()
+#     """
+#     if handle is None:
+#         handle = DeviceResources()
+#     cdef device_resources* handle_ = \
+#         <device_resources*><size_t>handle.getHandle()
 
-    dataset_ai = wrap_array(dataset)
-    dataset_dt = dataset_ai.dtype
-    _check_input_array(dataset_ai, [np.dtype('float32'), np.dtype('byte'),
-                                    np.dtype('ubyte')])
+#     dataset_ai = wrap_array(dataset)
+#     dataset_dt = dataset_ai.dtype
+#     _check_input_array(dataset_ai, [np.dtype('float32'), np.dtype('byte'),
+#                                     np.dtype('ubyte')])
 
-    knn_graph_ai = wrap_array(knn_graph)
-    knn_graph_dt = knn_graph_ai.dtype
-    if knn_graph_ai.from_cai:
-        raise ValueError(
-            "Parameter `knn_graph` has to be a host (NumPy) matrix."
-        )
-    _check_input_array(knn_graph_ai, [np.dtype('uint32')])
+#     knn_graph_ai = wrap_array(knn_graph)
+#     knn_graph_dt = knn_graph_ai.dtype
+#     if knn_graph_ai.from_cai:
+#         raise ValueError(
+#             "Parameter `knn_graph` has to be a host (NumPy) matrix."
+#         )
+#     _check_input_array(knn_graph_ai, [np.dtype('uint32')])
 
-    cdef optional[float] refine_rate_opt = <optional[float]> refine_rate
-    cdef optional[ivfpq_ip] build_params_opt = \
-        <optional[ivfpq_ip]> build_params
-    cdef optional[ivfpq_sp] search_params_opt = \
-        <optional[ivfpq_sp]> search_params
+#     cdef optional[float] refine_rate_opt = <float>refine_rate
+#     cdef optional[IVFPQ_IP] build_params_opt = \
+#         <IVFPQ_IP*> build_params.params
+#     cdef optional[IVFPQ_SP] search_params_opt = \
+#         <IVFPQ_SP*> search_params.params
 
-    if dataset_ai.from_cai:
-        if dataset_ai.dtype == np.float32:
-            with cuda_interruptible():
-                c_cagra.build_knn_graph(
-                    deref(handle_),
-                    index_params.params,
-                    get_dmv_float_uint32(dataset_ai,
-                                         check_shape=True),
-                    get_hmv_uint32_uint32(knn_graph_ai,
-                                          check_shape=True),
-                    refine_rate_opt,
-                    build_params_opt,
-                    search_params_opt
-                )
+#     if dataset_ai.from_cai:
+#         if dataset_ai.dtype == np.float32:
+#             with cuda_interruptible():
+#                 c_cagra.build_knn_graph(
+#                     deref(handle_),
+#                     index_params.params,
+#                     get_dmv_float_uint32(dataset_ai,
+#                                          check_shape=True),
+#                     get_hmv_uint32_uint32(knn_graph_ai,
+#                                           check_shape=True),
+#                     refine_rate_opt,
+#                     build_params_opt,
+#                     search_params_opt
+#                 )
 
-        elif dataset_ai.dtype == np.byte:
-            with cuda_interruptible():
-                c_cagra.build_knn_graph(
-                    deref(handle_),
-                    index_params.params,
-                    get_dmv_int8_uint32(dataset_ai,
-                                        check_shape=True),
-                    get_hmv_uint32_uint32(knn_graph_ai,
-                                          check_shape=True),
-                    refine_rate_opt,
-                    build_params_opt,
-                    search_params_opt
-                )
+    #     elif dataset_ai.dtype == np.byte:
+    #         with cuda_interruptible():
+    #             c_cagra.build_knn_graph(
+    #                 deref(handle_),
+    #                 index_params.params,
+    #                 get_dmv_int8_uint32(dataset_ai,
+    #                                     check_shape=True),
+    #                 get_hmv_uint32_uint32(knn_graph_ai,
+    #                                       check_shape=True),
+    #                 refine_rate_opt,
+    #                 build_params_opt,
+    #                 search_params_opt
+    #             )
 
-        elif dataset_ai.dtype == np.ubyte:
-            with cuda_interruptible():
-                c_cagra.build_knn_graph(
-                    deref(handle_),
-                    index_params.params,
-                    get_dmv_uint8_uint32(dataset_ai,
-                                         check_shape=True),
-                    get_hmv_uint32_uint32(knn_graph_ai,
-                                          check_shape=True),
-                    refine_rate_opt,
-                    build_params_opt,
-                    search_params_opt
-                )
+    #     elif dataset_ai.dtype == np.ubyte:
+    #         with cuda_interruptible():
+    #             c_cagra.build_knn_graph(
+    #                 deref(handle_),
+    #                 index_params.params,
+    #                 get_dmv_uint8_uint32(dataset_ai,
+    #                                      check_shape=True),
+    #                 get_hmv_uint32_uint32(knn_graph_ai,
+    #                                       check_shape=True),
+    #                 refine_rate_opt,
+    #                 build_params_opt,
+    #                 search_params_opt
+    #             )
 
-    else:
-        if dataset_ai.dtype == np.float32:
-            with cuda_interruptible():
-                c_cagra.build_knn_graph(
-                    deref(handle_),
-                    index_params.params,
-                    get_hmv_float_uint32(dataset_ai,
-                                         check_shape=True),
-                    get_hmv_uint32_uint32(knn_graph_ai,
-                                          check_shape=True),
-                    refine_rate_opt,
-                    build_params_opt,
-                    search_params_opt
-                )
+    # else:
+    #     if dataset_ai.dtype == np.float32:
+    #         with cuda_interruptible():
+    #             c_cagra.build_knn_graph(
+    #                 deref(handle_),
+    #                 index_params.params,
+    #                 get_hmv_float_uint32(dataset_ai,
+    #                                      check_shape=True),
+    #                 get_hmv_uint32_uint32(knn_graph_ai,
+    #                                       check_shape=True),
+    #                 refine_rate_opt,
+    #                 build_params_opt,
+    #                 search_params_opt
+    #             )
 
-        elif dataset_ai.dtype == np.byte:
-            with cuda_interruptible():
-                c_cagra.build_knn_graph(
-                    deref(handle_),
-                    index_params.params,
-                    get_hmv_int8_uint32(dataset_ai,
-                                        check_shape=True),
-                    get_hmv_uint32_uint32(knn_graph_ai,
-                                          check_shape=True),
-                    refine_rate_opt,
-                    build_params_opt,
-                    search_params_opt
-                )
+    #     elif dataset_ai.dtype == np.byte:
+    #         with cuda_interruptible():
+    #             c_cagra.build_knn_graph(
+    #                 deref(handle_),
+    #                 index_params.params,
+    #                 get_hmv_int8_uint32(dataset_ai,
+    #                                     check_shape=True),
+    #                 get_hmv_uint32_uint32(knn_graph_ai,
+    #                                       check_shape=True),
+    #                 refine_rate_opt,
+    #                 build_params_opt,
+    #                 search_params_opt
+    #             )
 
-        elif dataset_ai.dtype == np.ubyte:
-            with cuda_interruptible():
-                c_cagra.build_knn_graph(
-                    deref(handle_),
-                    index_params.params,
-                    get_hmv_uint8_uint32(dataset_ai,
-                                         check_shape=True),
-                    get_hmv_uint32_uint32(knn_graph_ai,
-                                          check_shape=True),
-                    refine_rate_opt,
-                    build_params_opt,
-                    search_params_opt
-                )
+    #     elif dataset_ai.dtype == np.ubyte:
+    #         with cuda_interruptible():
+    #             c_cagra.build_knn_graph(
+    #                 deref(handle_),
+    #                 index_params.params,
+    #                 get_hmv_uint8_uint32(dataset_ai,
+    #                                      check_shape=True),
+    #                 get_hmv_uint32_uint32(knn_graph_ai,
+    #                                       check_shape=True),
+    #                 refine_rate_opt,
+    #                 build_params_opt,
+    #                 search_params_opt
+    #             )
 
 
 @auto_sync_handle
@@ -449,7 +457,7 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
     if dataset_ai.from_cai:
         if dataset_ai.dtype == np.float32:
             with cuda_interruptible():
-                c_cagra.sort_knn_graph(
+                c_cagra.sort_knn_graph_device(
                     deref(handle_),
                     get_dmv_float_uint32(dataset_ai,
                                          check_shape=True),
@@ -458,7 +466,7 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
                 )
         elif dataset_ai.dtype == np.byte:
             with cuda_interruptible():
-                c_cagra.sort_knn_graph(
+                c_cagra.sort_knn_graph_device(
                     deref(handle_),
                     get_dmv_int8_uint32(dataset_ai,
                                         check_shape=True),
@@ -467,7 +475,7 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
                 )
         elif dataset_ai.dtype == np.ubyte:
             with cuda_interruptible():
-                c_cagra.sort_knn_graph(
+                c_cagra.sort_knn_graph_device(
                     deref(handle_),
                     get_dmv_uint8_uint32(dataset_ai,
                                          check_shape=True),
@@ -477,7 +485,7 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
     else:
         if dataset_ai.dtype == np.float32:
             with cuda_interruptible():
-                c_cagra.sort_knn_graph(
+                c_cagra.sort_knn_graph_host(
                     deref(handle_),
                     get_hmv_float_uint32(dataset_ai,
                                          check_shape=True),
@@ -486,7 +494,7 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
                 )
         elif dataset_ai.dtype == np.byte:
             with cuda_interruptible():
-                c_cagra.sort_knn_graph(
+                c_cagra.sort_knn_graph_host(
                     deref(handle_),
                     get_hmv_int8_uint32(dataset_ai,
                                         check_shape=True),
@@ -495,7 +503,7 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
                 )
         elif dataset_ai.dtype == np.ubyte:
             with cuda_interruptible():
-                c_cagra.sort_knn_graph(
+                c_cagra.sort_knn_graph_host(
                     deref(handle_),
                     get_hmv_uint8_uint32(dataset_ai,
                                          check_shape=True),

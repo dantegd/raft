@@ -38,7 +38,7 @@ namespace raft::runtime::neighbors::experimental::cagra {
     return raft::neighbors::experimental::cagra::build<T, IdxT>(handle, params, dataset);      \
   }                                                                                            \
                                                                                                \
-  void build(raft::resources const& handle,                                                    \
+  void build_device(raft::resources const& handle,                                             \
              const raft::neighbors::experimental::cagra::index_params& params,                 \
              raft::device_matrix_view<const T, IdxT, row_major> dataset,                       \
              raft::neighbors::experimental::cagra::index<T, IdxT>& idx)                        \
@@ -46,7 +46,7 @@ namespace raft::runtime::neighbors::experimental::cagra {
     idx = build(handle, params, dataset);                                                      \
   }                                                                                            \
                                                                                                \
-  void build(raft::resources const& handle,                                                    \
+  void build_host(raft::resources const& handle,                                               \
              const raft::neighbors::experimental::cagra::index_params& params,                 \
              raft::host_matrix_view<const T, IdxT, row_major> dataset,                         \
              raft::neighbors::experimental::cagra::index<T, IdxT>& idx)                        \
@@ -54,7 +54,7 @@ namespace raft::runtime::neighbors::experimental::cagra {
     idx = build(handle, params, dataset);                                                      \
   }                                                                                            \
                                                                                                \
-  void build_knn_graph(raft::resources const& handle,                                          \
+  void build_knn_graph_device(raft::resources const& handle,                                          \
                        raft::device_matrix_view<const T, IdxT, row_major> dataset,             \
                        raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph,                \
                        std::optional<float> refine_rate,                                       \
@@ -65,7 +65,7 @@ namespace raft::runtime::neighbors::experimental::cagra {
       handle, dataset, knn_graph, refine_rate, build_params, search_params);                   \
   }                                                                                            \
                                                                                                \
-  void build_knn_graph(raft::resources const& handle,                                          \
+  void build_knn_graph_host(raft::resources const& handle,                                          \
                        raft::host_matrix_view<const T, IdxT, row_major> dataset,               \
                        raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph,                \
                        std::optional<float> refine_rate,                                       \
