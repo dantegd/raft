@@ -238,8 +238,9 @@ cdef class IndexUint8(Index):
 
 
 @auto_sync_handle
-def build_knn_graph(dataset, knn_graph,
+def build_knn_graph(dataset,
                     IndexParams index_params,
+                    knn_graph=None,
                     ivf_pq.IndexParams build_params=None,
                     ivf_pq.SearchParams search_params=None,
                     refine_rate=0,
@@ -275,7 +276,7 @@ def build_knn_graph(dataset, knn_graph,
 
     Returns
     -------
-    index: ivf_pq.Index
+    knn_graph: array interface compliant matrix shape (n_samples, dim)
 
     Examples
     --------
@@ -298,6 +299,9 @@ def build_knn_graph(dataset, knn_graph,
     dataset_dt = dataset_ai.dtype
     _check_input_array(dataset_ai, [np.dtype('float32'), np.dtype('byte'),
                                     np.dtype('ubyte')])
+
+    if knn_graph is None:
+        knn_graph = device_ndarray.empty((n_queries, k), dtype='uint32')
 
     knn_graph_ai = wrap_array(knn_graph)
     knn_graph_dt = knn_graph_ai.dtype
@@ -392,6 +396,8 @@ def build_knn_graph(dataset, knn_graph,
                     build_params_opt,
                     search_params_opt
                 )
+
+        return knn_graph
 
 
 @auto_sync_handle
@@ -507,7 +513,7 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
 
 
 @auto_sync_handle
-def optimize(knn_graph, new_graph, handle=None):
+def optimize(knn_graph, new_graph=None, handle=None):
     """
     Prune a KNN graph.
 
@@ -548,6 +554,8 @@ def optimize(knn_graph, new_graph, handle=None):
         )
     _check_input_array(knn_graph_ai, [np.dtype('uint32')])
 
+    if new_graph is None:
+        new_graph = device_ndarray.empty((n_queries, k), dtype='uint32')
     new_graph_ai = wrap_array(new_graph)
     new_graph_dt = new_graph_ai.dtype
     if new_graph_ai.from_cai:
@@ -559,6 +567,8 @@ def optimize(knn_graph, new_graph, handle=None):
     c_cagra.optimize(deref(handle_),
                      get_hmv_uint32_uint32(knn_graph_ai, check_shape=True),
                      get_hmv_uint32_uint32(new_graph_ai, check_shape=True))
+
+    return new_graph
 
 
 @auto_sync_handle
