@@ -165,7 +165,11 @@ cdef extern from "raft_runtime/neighbors/cagra.hpp" \
                     optional[ivfpq_ip] build_params,
                     optional[ivfpq_sp] search_params) except +
 
-    cdef void optimize(const device_resources& handle,
+    cdef void optimize_device(const device_resources& handle,
+                       device_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
+                       host_matrix_view[uint32_t, uint32_t, row_major] new_graph) except +
+
+    cdef void optimize_host(const device_resources& handle,
                        host_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
                        host_matrix_view[uint32_t, uint32_t, row_major] new_graph) except +
 

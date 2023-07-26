@@ -512,63 +512,63 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
                 )
 
 
-# @auto_sync_handle
-# def optimize(knn_graph, new_graph=None, handle=None):
-#     """
-#     Prune a KNN graph.
+@auto_sync_handle
+def optimize(knn_graph, new_graph=None, handle=None):
+    """
+    Prune a KNN graph.
 
-#     Decreases the number of neighbors for each node.
+    Decreases the number of neighbors for each node.
 
-#     Parameters
-#     ----------
-#     handle:
-#         RAFT resources
-#     knn_graph: array interface compliant matrix shape (n_samples, dim)
-#         a host matrix containing the knn_graph of shape [n_rows, graph_degree]
-#     knn_graph: array interface compliant matrix shape (n_samples, dim)
-#         a host matrix view to store the output knn graph [n_rows, graph_degree]
-#     {handle_docstring}
+    Parameters
+    ----------
+    handle:
+        RAFT resources
+    knn_graph: array interface compliant matrix shape (n_samples, dim)
+        a host matrix containing the knn_graph of shape [n_rows, graph_degree]
+    knn_graph: array interface compliant matrix shape (n_samples, dim)
+        a host matrix view to store the output knn graph [n_rows, graph_degree]
+    {handle_docstring}
 
-#     Examples
-#     --------
+    Examples
+    --------
 
-#     >>> import cupy as cp
+    >>> import cupy as cp
 
-#     >>> from pylibraft.common import DeviceResources
-#     >>> from pylibraft.neighbors import cagra
+    >>> from pylibraft.common import DeviceResources
+    >>> from pylibraft.neighbors import cagra
 
-#     >>> # pylibraft functions are often asynchronous so the
-#     >>> # handle needs to be explicitly synchronized
-#     >>> handle.sync()
-#     """
-#     if handle is None:
-#         handle = DeviceResources()
-#     cdef device_resources* handle_ = \
-#         <device_resources*><size_t>handle.getHandle()
+    >>> # pylibraft functions are often asynchronous so the
+    >>> # handle needs to be explicitly synchronized
+    >>> handle.sync()
+    """
+    if handle is None:
+        handle = DeviceResources()
+    cdef device_resources* handle_ = \
+        <device_resources*><size_t>handle.getHandle()
 
-#     knn_graph_ai = wrap_array(knn_graph)
-#     knn_graph_dt = knn_graph_ai.dtype
-#     if knn_graph_ai.from_cai:
-#         raise ValueError(
-#             "Parameter `knn_graph` has to be a host (NumPy) matrix."
-#         )
-#     _check_input_array(knn_graph_ai, [np.dtype('uint32')])
+    knn_graph_ai = wrap_array(knn_graph)
+    knn_graph_dt = knn_graph_ai.dtype
+    if knn_graph_ai.from_cai:
+        raise ValueError(
+            "Parameter `knn_graph` has to be a host (NumPy) matrix."
+        )
+    _check_input_array(knn_graph_ai, [np.dtype('uint32')])
 
-#     if new_graph is None:
-#         new_graph = device_ndarray.empty(knn_graph_ai.shape(), dtype='uint32')
-#     new_graph_ai = wrap_array(new_graph)
-#     new_graph_dt = new_graph_ai.dtype
-#     if new_graph_ai.from_cai:
-#         raise ValueError(
-#             "Parameter `new_graph` has to be a host (NumPy) matrix."
-#         )
-#     _check_input_array(new_graph_ai, [np.dtype('uint32')])
+    if new_graph is None:
+        new_graph = device_ndarray.empty(knn_graph_ai.shape(), dtype='uint32')
+    new_graph_ai = wrap_array(new_graph)
+    new_graph_dt = new_graph_ai.dtype
+    if new_graph_ai.from_cai:
+        raise ValueError(
+            "Parameter `new_graph` has to be a host (NumPy) matrix."
+        )
+    _check_input_array(new_graph_ai, [np.dtype('uint32')])
 
-#     c_cagra.optimize(deref(handle_),
-#                      get_hmv_uint32_uint32(knn_graph_ai, check_shape=True),
-#                      get_hmv_uint32_uint32(new_graph_ai, check_shape=True))
+    c_cagra.optimize(deref(handle_),
+                     get_hmv_uint32_uint32(knn_graph_ai, check_shape=True),
+                     get_hmv_uint32_uint32(new_graph_ai, check_shape=True))
 
-#     return new_graph
+    return new_graph
 
 
 # @auto_sync_handle

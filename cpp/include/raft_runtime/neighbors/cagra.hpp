@@ -98,7 +98,11 @@ RAFT_INST_CAGRA_FUNCS(uint8_t, uint32_t);
 #undef RAFT_INST_CAGRA_FUNCS
 
 #define RAFT_INST_CAGRA_OPTIMIZE(IdxT)                                   \
-  void optimize(raft::resources const& res,                              \
+  void optimize_device(raft::resources const& res,                              \
+                raft::device_matrix_view<IdxT, IdxT, row_major> knn_graph, \
+                raft::host_matrix_view<IdxT, IdxT, row_major> new_graph); \
+   \
+  void optimize_host(raft::resources const& res,                              \
                 raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph, \
                 raft::host_matrix_view<IdxT, IdxT, row_major> new_graph);
 
