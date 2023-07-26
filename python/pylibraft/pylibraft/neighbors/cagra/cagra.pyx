@@ -241,6 +241,7 @@ cdef class IndexUint8(Index):
 def build_knn_graph(dataset,
                     IndexParams index_params,
                     knn_graph=None,
+                    graph_degree=128,
                     ivf_pq.IndexParams build_params=None,
                     ivf_pq.SearchParams search_params=None,
                     refine_rate=0,
@@ -301,7 +302,9 @@ def build_knn_graph(dataset,
                                     np.dtype('ubyte')])
 
     if knn_graph is None:
-        knn_graph = device_ndarray.empty((n_queries, k), dtype='uint32')
+        knn_graph = device_ndarray.empty((dataset_ai.shape()[0],
+                                          graph_degree),
+                                         dtype='uint32')
 
     knn_graph_ai = wrap_array(knn_graph)
     knn_graph_dt = knn_graph_ai.dtype
@@ -443,9 +446,6 @@ def sort_knn_graph(dataset, knn_graph, handle=None):
     _check_input_array(dataset_ai, [np.dtype('float32'), np.dtype('byte'),
                                     np.dtype('ubyte')])
 
-    if knn_graph is None:
-        knn_graph = device_ndarray.empty((n_queries, k), dtype='uint32')
-
     knn_graph_ai = wrap_array(knn_graph)
     knn_graph_dt = knn_graph_ai.dtype
     if knn_graph_ai.from_cai:
@@ -555,7 +555,7 @@ def optimize(knn_graph, new_graph=None, handle=None):
     _check_input_array(knn_graph_ai, [np.dtype('uint32')])
 
     if new_graph is None:
-        new_graph = device_ndarray.empty((n_queries, k), dtype='uint32')
+        new_graph = device_ndarray.empty(knn_graph_ai.shape(), dtype='uint32')
     new_graph_ai = wrap_array(new_graph)
     new_graph_dt = new_graph_ai.dtype
     if new_graph_ai.from_cai:
