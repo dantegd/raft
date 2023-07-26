@@ -35,7 +35,7 @@ from pylibraft.common.cpp.mdspan cimport (
     host_matrix_view,
     row_major,
 )
-from pylibraft.common.handle cimport device_resources
+from pylibraft.common.handle cidevice_resources
 from pylibraft.common.optional cimport optional
 from pylibraft.distance.distance_type cimport DistanceType
 from pylibraft.neighbors.ivf_pq.cpp.c_ivf_pq cimport (
@@ -81,7 +81,7 @@ cdef extern from "raft/neighbors/cagra_types.hpp" \
         uint64_t rand_xor_mask
 
     cdef cppclass index[T, IdxT](ann_index):
-        index(const device_resources&)
+        index(device_resources&)
 
         DistanceType metric()
         IdxT size()
@@ -93,108 +93,108 @@ cdef extern from "raft/neighbors/cagra_types.hpp" \
 cdef extern from "raft_runtime/neighbors/cagra.hpp" \
         namespace "raft::runtime::neighbors::cagra" nogil:
 
-    cdef void build_device(const device_resources&,
+    cdef void build_device(device_resources&,
                     const index_params& params,
                     device_matrix_view[float, uint32_t, row_major] dataset,
                     index[float, uint32_t]& index) except +
 
-    cdef void build_device(const device_resources& handle,
+    cdef void build_device(device_resources& handle,
                     const index_params& params,
                     device_matrix_view[int8_t, uint32_t, row_major] dataset,
                     index[int8_t, uint32_t]& index) except +
 
-    cdef void build_device(const device_resources& handle,
+    cdef void build_device(device_resources& handle,
                     const index_params& params,
                     device_matrix_view[uint8_t, uint32_t, row_major] dataset,
                     index[uint8_t, uint32_t]& index) except +
 
-    cdef void build_host(const device_resources&,
+    cdef void build_host(device_resources&,
                     const index_params& params,
                     host_matrix_view[float, uint32_t, row_major] dataset,
                     index[float, uint32_t]& index) except +
 
-    cdef void build_host(const device_resources& handle,
+    cdef void build_host(device_resources& handle,
                     const index_params& params,
                     host_matrix_view[int8_t, uint32_t, row_major] dataset,
                     index[int8_t, uint32_t]& index) except +
 
-    cdef void build_host(const device_resources& handle,
+    cdef void build_host(device_resources& handle,
                     const index_params& params,
                     host_matrix_view[uint8_t, uint32_t, row_major] dataset,
                     index[uint8_t, uint32_t]& index) except +
 
-    cdef void build_knn_graph_device(const device_resources&,
+    cdef void build_knn_graph_device(device_resources&,
                     device_matrix_view[float, uint32_t, row_major] dataset,
                     host_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
                     optional[float] refine_rate,
                     optional[ivfpq_ip] build_params,
                     optional[ivfpq_sp] search_params) except +
 
-    cdef void build_knn_graph_device(const device_resources&,
+    cdef void build_knn_graph_device(device_resources&,
                     device_matrix_view[int8_t, uint32_t, row_major] dataset,
                     host_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
                     optional[float] refine_rate,
                     optional[ivfpq_ip] build_params,
                     optional[ivfpq_sp] search_params) except +
 
-    cdef void build_knn_graph_device(const device_resources&,
+    cdef void build_knn_graph_device(device_resources&,
                     device_matrix_view[uint8_t, uint32_t, row_major] dataset,
                     host_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
                     optional[float] refine_rate,
                     optional[ivfpq_ip] build_params,
                     optional[ivfpq_sp] search_params) except +
 
-    cdef void build_knn_graph_host(const device_resources&,
+    cdef void build_knn_graph_host(device_resources&,
                     host_matrix_view[float, uint32_t, row_major] dataset,
                     host_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
                     optional[float] refine_rate,
                     optional[ivfpq_ip] build_params,
                     optional[ivfpq_sp] search_params) except +
 
-    cdef void build_knn_graph_host(const device_resources&,
+    cdef void build_knn_graph_host(device_resources&,
                     host_matrix_view[int8_t, uint32_t, row_major] dataset,
                     host_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
                     optional[float] refine_rate,
                     optional[ivfpq_ip] build_params,
                     optional[ivfpq_sp] search_params) except +
 
-    cdef void build_knn_graph_host(const device_resources&,
+    cdef void build_knn_graph_host(device_resources&,
                     host_matrix_view[uint8_t, uint32_t, row_major] dataset,
                     host_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
                     optional[float] refine_rate,
                     optional[ivfpq_ip] build_params,
                     optional[ivfpq_sp] search_params) except +
 
-    cdef void optimize(const device_resources&,
+    cdef void optimize(device_resources&,
                        host_matrix_view[uint32_t, uint32_t, row_major] knn_graph,
                        host_matrix_view[uint32_t, uint32_t, row_major] new_graph) except +
 
-    cdef void sort_knn_graph_device(const device_resources&,
+    cdef void sort_knn_graph_device(device_resources&,
                              device_matrix_view[float, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
-    cdef void sort_knn_graph_device(const device_resources&,
+    cdef void sort_knn_graph_device(device_resources&,
                              device_matrix_view[int8_t, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
-    cdef void sort_knn_graph_device(const device_resources&,
+    cdef void sort_knn_graph_device(device_resources&,
                              device_matrix_view[uint8_t, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
-    cdef void sort_knn_graph_host(const device_resources&,
+    cdef void sort_knn_graph_host(device_resources&,
                              host_matrix_view[float, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
-    cdef void sort_knn_graph_host(const device_resources&,
+    cdef void sort_knn_graph_host(device_resources&,
                              host_matrix_view[int8_t, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
-    cdef void sort_knn_graph_host(const device_resources&,
+    cdef void sort_knn_graph_host(device_resources&,
                              host_matrix_view[uint8_t, uint32_t, row_major] dataset,
                              host_matrix_view[uint32_t, uint32_t, row_major] knn_graph) except +
 
     cdef void search(
-        const device_resources& handle,
+        device_resources& handle,
         const search_params& params,
         const index[float, uint32_t]& index,
         device_matrix_view[float, uint32_t, row_major] queries,
@@ -202,7 +202,7 @@ cdef extern from "raft_runtime/neighbors/cagra.hpp" \
         device_matrix_view[float, uint32_t, row_major] distances) except +
 
     cdef void search(
-        const device_resources& handle,
+        device_resources& handle,
         const search_params& params,
         const index[int8_t, uint32_t]& index,
         device_matrix_view[int8_t, uint32_t, row_major] queries,
@@ -210,57 +210,57 @@ cdef extern from "raft_runtime/neighbors/cagra.hpp" \
         device_matrix_view[float, uint32_t, row_major] distances) except +
 
     cdef void search(
-        const device_resources& handle,
+        device_resources& handle,
         const search_params& params,
         const index[uint8_t, uint32_t]& index,
         device_matrix_view[uint8_t, uint32_t, row_major] queries,
         device_matrix_view[uint32_t, uint32_t, row_major] neighbors,
         device_matrix_view[float, uint32_t, row_major] distances) except +
 
-    cdef void serialize(const device_resources& handle,
+    cdef void serialize(device_resources& handle,
                         string& str,
                         const index[float, uint32_t]& index) except +
 
-    cdef void deserialize(const device_resources& handle,
+    cdef void deserialize(device_resources& handle,
                           const string& str,
                           index[float, uint32_t]* index) except +
 
-    cdef void serialize(const device_resources& handle,
+    cdef void serialize(device_resources& handle,
                         string& str,
                         const index[uint8_t, uint32_t]& index) except +
 
-    cdef void deserialize(const device_resources& handle,
+    cdef void deserialize(device_resources& handle,
                           const string& str,
                           index[uint8_t, uint32_t]* index) except +
 
-    cdef void serialize(const device_resources& handle,
+    cdef void serialize(device_resources& handle,
                         string& str,
                         const index[int8_t, uint32_t]& index) except +
 
-    cdef void deserialize(const device_resources& handle,
+    cdef void deserialize(device_resources& handle,
                           const string& str,
                           index[int8_t, uint32_t]* index) except +
 
-    cdef void serialize_file(const device_resources& handle,
+    cdef void serialize_file(device_resources& handle,
                              const string& filename,
                              const index[float, uint32_t]& index) except +
 
-    cdef void deserialize_file(const device_resources& handle,
+    cdef void deserialize_file(device_resources& handle,
                                const string& filename,
                                index[float, uint32_t]* index) except +
 
-    cdef void serialize_file(const device_resources& handle,
+    cdef void serialize_file(device_resources& handle,
                              const string& filename,
                              const index[uint8_t, uint32_t]& index) except +
 
-    cdef void deserialize_file(const device_resources& handle,
+    cdef void deserialize_file(device_resources& handle,
                                const string& filename,
                                index[uint8_t, uint32_t]* index) except +
 
-    cdef void serialize_file(const device_resources& handle,
+    cdef void serialize_file(device_resources& handle,
                              const string& filename,
                              const index[int8_t, uint32_t]& index) except +
 
-    cdef void deserialize_file(const device_resources& handle,
+    cdef void deserialize_file(device_resources& handle,
                                const string& filename,
                                index[int8_t, uint32_t]* index) except +
