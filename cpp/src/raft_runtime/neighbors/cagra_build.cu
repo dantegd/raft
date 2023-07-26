@@ -99,12 +99,12 @@ RAFT_INST_CAGRA_BUILD(uint8_t, uint32_t);
   void optimize_device(raft::resources const& res,                              \
                 raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph, \
                 raft::host_matrix_view<IdxT, IdxT, row_major> new_graph){ \
-    raft::neighbors::cagra::sort_knn_graph<T, IdxT>(handle, dataset, knn_graph);
+    raft::neighbors::cagra::optimize(handle, dataset, knn_graph);
   } \
   void optimize_host(raft::resources const& res,                              \
                 raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph, \
                 raft::host_matrix_view<IdxT, IdxT, row_major> new_graph){ \
-    raft::neighbors::cagra::sort_knn_graph<T, IdxT>(handle, dataset, knn_graph);
+    raft::neighbors::cagra::optimize(handle, dataset, knn_graph);
   }
 
 RAFT_INST_CAGRA_OPTIMIZE(uint32_t);
