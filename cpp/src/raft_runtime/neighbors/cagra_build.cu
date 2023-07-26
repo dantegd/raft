@@ -83,7 +83,7 @@ namespace raft::runtime::neighbors::cagra {
     raft::neighbors::cagra::sort_knn_graph<T, IdxT>(handle, dataset, knn_graph); \
   } \
   void sort_knn_graph_host(raft::resources const& handle,                                           \
-                      raft::device_matrix_view<const T, IdxT, row_major> dataset,              \
+                      raft::host_matrix_view<const T, IdxT, row_major> dataset,              \
                       raft::host_matrix_view<IdxT, IdxT, row_major> knn_graph)                 \
   {                                                                                            \
     raft::neighbors::cagra::sort_knn_graph<T, IdxT>(handle, dataset, knn_graph); \
