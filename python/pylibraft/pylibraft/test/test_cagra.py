@@ -91,9 +91,7 @@ def run_cagra_build_search_test(
         dataset = normalize(dataset, norm="l2", axis=1)
     dataset_device = device_ndarray(dataset)
 
-    build_params = cagra.IndexParams(
-
-    )
+    build_params = cagra.IndexParams()
 
     if array_type == "device":
         index = cagra.build(build_params, dataset_device)
