@@ -96,7 +96,7 @@ cdef extern from "raft_runtime/neighbors/cagra.hpp" \
     cdef void build_device(
         const device_resources& handle,
         const index_params& params,
-        device_matrix_view[float, unt364t, row_major] dataset,
+        device_matrix_view[float, int64_t, row_major] dataset,
         index[float, uint32_t]& index) except +
 
     cdef void build_device(
