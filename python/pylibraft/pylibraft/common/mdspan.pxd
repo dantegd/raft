@@ -49,29 +49,17 @@ cdef optional[device_matrix_view[int64_t, int64_t, row_major]] make_optional_vie
 cdef device_matrix_view[float, uint32_t, row_major] get_dmv_float_uint32(
     array, check_shape) except *
 
-cdef device_matrix_view[uint8_t, uint32_t, row_major] get_dmv_uint8_uint32(
+cdef host_matrix_view[float, uint32_t, row_major] get_hmv_float(
     array, check_shape) except *
 
-cdef device_matrix_view[int8_t, uint32_t, row_major] get_dmv_int8_uint32(
+cdef host_matrix_view[uint8_t, uint32_t, row_major] get_hmv_uint8(
     array, check_shape) except *
 
-cdef device_matrix_view[int64_t, uint32_t, row_major] get_dmv_int64_uint32(
+cdef host_matrix_view[int8_t, uint32_t, row_major] get_hmv_int8(
     array, check_shape) except *
 
-cdef device_matrix_view[uint32_t, uint32_t, row_major] get_dmv_uint32_uint32(
+cdef host_matrix_view[int64_t, uint32_t, row_major] get_hmv_int64(
     array, check_shape) except *
 
-cdef host_matrix_view[float, uint32_t, row_major] get_hmv_float_uint32(
-    array, check_shape) except *
-
-cdef host_matrix_view[uint8_t, uint32_t, row_major] get_hmv_uint8_uint32(
-    array, check_shape) except *
-
-cdef host_matrix_view[int8_t, uint32_t, row_major] get_hmv_int8_uint32(
-    array, check_shape) except *
-
-cdef host_matrix_view[int64_t, uint32_t, row_major] get_hmv_int64_uint32(
-    array, check_shape) except *
-
-cdef host_matrix_view[uint32_t, uint32_t, row_major] get_hmv_uint32_uint32(
+cdef host_matrix_view[uint32_t, uint32_t, row_major] get_hmv_uint32(
     array, check_shape) except *
