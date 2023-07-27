@@ -85,7 +85,6 @@ from pylibraft.common.mdspan cimport (
 )
 from pylibraft.neighbors.common cimport _get_metric_string
 from pylibraft.neighbors.ivf_pq cimport ivf_pq
-
 from pylibraft.neighbors.ivf_pq.cpp.c_ivf_pq cimport (
     index_params as IVFPQ_IP,
     search_params as IVFPQ_SP,
@@ -599,13 +598,15 @@ def optimize(knn_graph, new_graph=None, handle=None):
     _check_input_array(new_graph_ai, [np.dtype('uint32')])
 
     if knn_graph_ai.from_cai:
-        c_cagra.optimize_device(deref(handle_),
-                         get_dmv_uint32_uint32(knn_graph_ai, check_shape=True),
-                         get_hmv_uint32_uint32(new_graph_ai, check_shape=True))
+        c_cagra.optimize_device(
+            deref(handle_),
+            get_dmv_uint32_uint32(knn_graph_ai, check_shape=True),
+            get_hmv_uint32_uint32(new_graph_ai, check_shape=True))
     else:
-        c_cagra.optimize_host(deref(handle_),
-                         get_hmv_uint32_uint32(knn_graph_ai, check_shape=True),
-                         get_hmv_uint32_uint32(new_graph_ai, check_shape=True))
+        c_cagra.optimize_host(
+            deref(handle_),
+            get_hmv_uint32_uint32(knn_graph_ai, check_shape=True),
+            get_hmv_uint32_uint32(new_graph_ai, check_shape=True))
 
     return new_graph
 
@@ -672,33 +673,36 @@ def build(IndexParams index_params, dataset, handle=None):
             idx_float = IndexFloat(handle)
             idx_float.active_index_type = "float32"
             with cuda_interruptible():
-                c_cagra.build_device(deref(handle_),
-                              index_params.params,
-                              get_dmv_float_uint32(dataset_ai,
-                                                   check_shape=True),
-                              deref(idx_float.index))
+                c_cagra.build_device(
+                    deref(handle_),
+                    index_params.params,
+                    get_dmv_float_uint32(dataset_ai,
+                                         check_shape=True),
+                    deref(idx_float.index))
             idx_float.trained = True
             return idx_float
         elif dataset_dt == np.byte:
             idx_int8 = IndexInt8(handle)
             idx_int8.active_index_type = "byte"
             with cuda_interruptible():
-                c_cagra.build_device(deref(handle_),
-                              index_params.params,
-                              get_dmv_int8_uint32(dataset_ai,
-                                                  check_shape=True),
-                              deref(idx_int8.index))
+                c_cagra.build_device(
+                    deref(handle_),
+                    index_params.params,
+                    get_dmv_int8_uint32(dataset_ai,
+                                        check_shape=True),
+                    deref(idx_int8.index))
             idx_int8.trained = True
             return idx_int8
         elif dataset_dt == np.ubyte:
             idx_uint8 = IndexUint8(handle)
             idx_uint8.active_index_type = "ubyte"
             with cuda_interruptible():
-                c_cagra.build_device(deref(handle_),
-                              index_params.params,
-                              get_dmv_uint8_uint32(dataset_ai,
-                                                   check_shape=True),
-                              deref(idx_uint8.index))
+                c_cagra.build_device(
+                    deref(handle_),
+                    index_params.params,
+                    get_dmv_uint8_uint32(dataset_ai,
+                                         check_shape=True),
+                    deref(idx_uint8.index))
             idx_uint8.trained = True
             return idx_uint8
         else:
@@ -706,47 +710,40 @@ def build(IndexParams index_params, dataset, handle=None):
                 idx_float = IndexFloat(handle)
                 idx_float.active_index_type = "float32"
                 with cuda_interruptible():
-                    c_cagra.build_host(deref(handle_),
-                                  index_params.params,
-                                  get_hmv_float_uint32(dataset_ai,
-                                                       check_shape=True),
-                                  deref(idx_float.index))
+                    c_cagra.build_host(
+                        deref(handle_),
+                        index_params.params,
+                        get_hmv_float_uint32(dataset_ai,
+                                             check_shape=True),
+                        deref(idx_float.index))
                 idx_float.trained = True
                 return idx_float
             elif dataset_dt == np.byte:
                 idx_int8 = IndexInt8(handle)
                 idx_int8.active_index_type = "byte"
                 with cuda_interruptible():
-                    c_cagra.build_host(deref(handle_),
-                                  index_params.params,
-                                  get_hmv_int8_uint32(dataset_ai,
-                                                      check_shape=True),
-                                  deref(idx_int8.index))
+                    c_cagra.build_host(
+                        deref(handle_),
+                        index_params.params,
+                        get_hmv_int8_uint32(dataset_ai,
+                                            check_shape=True),
+                        deref(idx_int8.index))
                 idx_int8.trained = True
                 return idx_int8
             elif dataset_dt == np.ubyte:
                 idx_uint8 = IndexUint8(handle)
                 idx_uint8.active_index_type = "ubyte"
                 with cuda_interruptible():
-                    c_cagra.build_host(deref(handle_),
-                                  index_params.params,
-                                  get_hmv_uint8_uint32(dataset_ai,
-                                                       check_shape=True),
-                                  deref(idx_uint8.index))
+                    c_cagra.build_host(
+                        deref(handle_),
+                        index_params.params,
+                        get_hmv_uint8_uint32(dataset_ai,
+                                             check_shape=True),
+                        deref(idx_uint8.index))
                 idx_uint8.trained = True
                 return idx_uint8
     else:
         raise TypeError("dtype %s not supported" % dataset_dt)
-
-
-# # cdef _get_search_algo(c_ivf_pq.codebook_gen codebook):
-# #     return {c_ivf_pq.codebook_gen.PER_SUBSPACE: "subspace",
-# #             c_ivf_pq.codebook_gen.PER_CLUSTER: "cluster"}[codebook]
-
-
-# # cdef _get_hashmap_mode(c_ivf_pq.codebook_gen codebook):
-# #     return {c_ivf_pq.codebook_gen.PER_SUBSPACE: "subspace",
-# #             c_ivf_pq.codebook_gen.PER_CLUSTER: "cluster"}[codebook]
 
 
 cdef class SearchParams:
@@ -756,7 +753,7 @@ cdef class SearchParams:
                  max_queries=0,
                  itopk_size=64,
                  max_iterations=0,
-                 algo=c_cagra.search_algo.AUTO,
+                 algo="auto",
                  team_size=0,
                  num_parents=1,
                  min_iterations=0,
@@ -810,12 +807,30 @@ cdef class SearchParams:
         self.params.max_queries = max_queries
         self.params.itopk_size = itopk_size
         self.params.max_iterations = max_iterations
-        self.params.algo = c_cagra.search_algo.AUTO
+        if algo == "single_cta":
+            self.params.algo = c_cagra.search_algo.SINGLE_CTA
+        elif algo == "multi_cta":
+            self.params.algo = c_cagra.search_algo.MULTI_CTA
+        elif algo == "multi_kernel":
+            self.params.algo = c_cagra.search_algo.MULTI_KERNEL
+        elif algo == "auto":
+            self.params.algo = c_cagra.search_algo.AUTO
+        else:
+            raise ValueError("`algo` value not supported.")
+
         self.params.team_size = team_size
         self.params.num_parents = num_parents
         self.params.min_iterations = min_iterations
         self.params.thread_block_size = thread_block_size
-        self.params.hashmap_mode = c_cagra.hash_mode.AUTO
+        if hashmap_mode == "hash":
+            self.params.hashmap_mode = c_cagra.hash_mode.HASH
+        elif hashmap_mode == "small":
+            self.params.hashmap_mode = c_cagra.hash_mode.SMALL
+        elif hashmap_mode == "auto":
+            self.params.hashmap_mode = c_cagra.hash_mode.AUTO
+        else:
+            raise ValueError("`hashmap_mode` value not supported.")
+
         self.params.hashmap_min_bitlen = hashmap_min_bitlen
         self.params.hashmap_max_fill_rate = hashmap_max_fill_rate
         self.params.num_random_samplings = num_random_samplings
@@ -1102,10 +1117,11 @@ def load(filename, handle=None):
     cdef IndexInt8 idx_int8
     cdef IndexUint8 idx_uint8
 
+    # we extract the dtype from the arrai interfaces in the file
     with open(filename, 'rb') as f:
-        type_str = f.read(3).decode('utf-8')
+        type_str = f.read(700).decode("utf-8", errors='ignore')
 
-    dataset_dt = np.dtype(type_str)
+    dataset_dt = np.dtype(type_str[673:676])
 
     if dataset_dt == np.float32:
         idx_float = IndexFloat(handle)
@@ -1129,4 +1145,4 @@ def load(filename, handle=None):
         idx_uint8.active_index_type = 'ubyte'
         return idx_uint8
     else:
-        raise ValueError("Index dtype %s not supported" % dataset_dt)
+        raise ValueError("Dataset dtype %s not supported" % dataset_dt)
