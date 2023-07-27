@@ -201,7 +201,7 @@ cdef optional[device_matrix_view[int64_t, int64_t, row_major]] \
 # todo(dantegd): we can unify and simplify this functions a little bit
 # defining extra functions as-is is the quickest way to get what we need for
 # cagra.pyx
-cdef device_matrix_view[uint32_t, uint32_t, row_major] \
+cdef device_matrix_view[uint32_t, int64_t, row_major] \
         get_dmv_uint32(cai, check_shape) except *:
     if cai.dtype != np.uint32:
         raise TypeError("dtype %s not supported" % cai.dtype)
@@ -212,7 +212,7 @@ cdef device_matrix_view[uint32_t, uint32_t, row_major] \
         <uint32_t*><uintptr_t>cai.data, shape[0], shape[1])
 
 
-cdef host_matrix_view[float, uint32_t, row_major] \
+cdef host_matrix_view[float, int64_t, row_major] \
         get_hmv_float(cai, check_shape) except *:
     if cai.dtype != np.uint32:
         raise TypeError("dtype %s not supported" % cai.dtype)
@@ -223,7 +223,7 @@ cdef host_matrix_view[float, uint32_t, row_major] \
         <float*><uintptr_t>cai.data, shape[0], shape[1])
 
 
-cdef host_matrix_view[uint8_t, uint32_t, row_major] \
+cdef host_matrix_view[uint8_t, int64_t, row_major] \
         get_hmv_uint8(cai, check_shape) except *:
     if cai.dtype != np.uint8:
         raise TypeError("dtype %s not supported" % cai.dtype)
@@ -234,7 +234,7 @@ cdef host_matrix_view[uint8_t, uint32_t, row_major] \
         <uint8_t*><uintptr_t>cai.data, shape[0], shape[1])
 
 
-cdef host_matrix_view[int8_t, uint32_t, row_major] \
+cdef host_matrix_view[int8_t, int64_t, row_major] \
         get_hmv_int8(cai, check_shape) except *:
     if cai.dtype != np.int8:
         raise TypeError("dtype %s not supported" % cai.dtype)
@@ -245,7 +245,7 @@ cdef host_matrix_view[int8_t, uint32_t, row_major] \
         <int8_t*><uintptr_t>cai.data, shape[0], shape[1])
 
 
-cdef host_matrix_view[int64_t, uint32_t, row_major] \
+cdef host_matrix_view[int64_t, int64_t, row_major] \
         get_hmv_int64(cai, check_shape) except *:
     if cai.dtype != np.int64:
         raise TypeError("dtype %s not supported" % cai.dtype)
@@ -256,7 +256,7 @@ cdef host_matrix_view[int64_t, uint32_t, row_major] \
         <int64_t*><uintptr_t>cai.data, shape[0], shape[1])
 
 
-cdef host_matrix_view[uint32_t, uint32_t, row_major] \
+cdef host_matrix_view[uint32_t, int64_t, row_major] \
         get_hmv_uint32(cai, check_shape) except *:
     if cai.dtype != np.int64:
         raise TypeError("dtype %s not supported" % cai.dtype)
