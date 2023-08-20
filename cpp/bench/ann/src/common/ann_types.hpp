@@ -20,7 +20,9 @@
 #include <string>
 #include <vector>
 
-#include <cuda_runtime_api.h>
+#ifndef CPU_ONLY
+#include <cuda_runtime_api.h>  // cudaStream_t
+#endif
 
 namespace raft::bench::ann {
 

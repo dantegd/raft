@@ -48,7 +48,7 @@ option(BUILD_SHARED_LIBS "Build raft shared libraries" ON)
 option(BUILD_TESTS "Build raft unit-tests" ON)
 option(BUILD_PRIMS_BENCH "Build raft C++ benchmark tests" OFF)
 option(BUILD_ANN_BENCH "Build raft ann benchmarks" OFF)
-option(BUILD_ANN_BENCH_CPU "Build CPU RAFT ANN benchmarks" OFF)
+option(CPU_ONLY "Build CPU RAFT ANN benchmarks" OFF)
 option(CUDA_ENABLE_KERNELINFO "Enable kernel resource usage info" OFF)
 option(CUDA_ENABLE_LINEINFO
        "Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler)" OFF
@@ -61,9 +61,10 @@ option(DISABLE_OPENMP "Disable OpenMP" OFF)
 option(RAFT_NVTX "Enable nvtx markers" OFF)
 
 set(RAFT_COMPILE_LIBRARY_DEFAULT OFF)
-if(BUILD_TESTS
-   OR BUILD_PRIMS_BENCH
-   OR BUILD_ANN_BENCH
+if((BUILD_TESTS
+    OR BUILD_PRIMS_BENCH
+    OR BUILD_ANN_BENCH)
+   AND NOT CPU_ONLY
 )
   set(RAFT_COMPILE_LIBRARY_DEFAULT ON)
 endif()
