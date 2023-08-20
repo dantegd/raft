@@ -48,7 +48,7 @@ option(BUILD_SHARED_LIBS "Build raft shared libraries" ON)
 option(BUILD_TESTS "Build raft unit-tests" ON)
 option(BUILD_PRIMS_BENCH "Build raft C++ benchmark tests" OFF)
 option(BUILD_ANN_BENCH "Build raft ann benchmarks" OFF)
-option(CPU_ONLY "Build CPU RAFT ANN benchmarks" OFF)
+option(CPU_ONLY "Build CPU only components. Apples to RAFT ANN benchmarks currently" OFF)
 option(CUDA_ENABLE_KERNELINFO "Enable kernel resource usage info" OFF)
 option(CUDA_ENABLE_LINEINFO
        "Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler)" OFF
@@ -72,6 +72,11 @@ option(RAFT_COMPILE_LIBRARY "Enable building raft shared library instantiations"
        ${RAFT_COMPILE_LIBRARY_DEFAULT}
 )
 
+if(CPU_ONLY)
+  set(BUILD_SHARED_LIBS OFF)
+  set(BUILD_TESTS OFF)
+endif()
+
 # Needed because GoogleBenchmark changes the state of FindThreads.cmake, causing subsequent runs to
 # have different values for the `Threads::Threads` target. Setting this flag ensures
 # `Threads::Threads` is the same value across all builds so that cache hits occur
@@ -84,6 +89,8 @@ include(CMakeDependentOption)
 message(VERBOSE "RAFT: Building optional components: ${raft_FIND_COMPONENTS}")
 message(VERBOSE "RAFT: Build RAFT unit-tests: ${BUILD_TESTS}")
 message(VERBOSE "RAFT: Building raft C++ benchmarks: ${BUILD_PRIMS_BENCH}")
+message(VERBOSE "RAFT: Building ANN benchmarks: ${BUILD_ANN_BENCH}")
+message(VERBOSE "RAFT: Build CPU only components: ${CPU_ONLY}")
 message(VERBOSE "RAFT: Enable detection of conda environment for dependencies: ${DETECT_CONDA_ENV}")
 message(VERBOSE "RAFT: Disable depreaction warnings " ${DISABLE_DEPRECATION_WARNINGS})
 message(VERBOSE "RAFT: Disable OpenMP: ${DISABLE_OPENMP}")
@@ -118,7 +125,7 @@ if(DETECT_CONDA_ENV)
 endif()
 
 # ##################################################################################################
-# * compiler options ---------------------------------------------------------
+# * compiler options ----------------------------------------------------------
 
 set(_ctk_static_suffix "")
 if(CUDA_STATIC_RUNTIME)
@@ -152,10 +159,12 @@ include(cmake/modules/ConfigureCUDA.cmake)
 # add third party dependencies using CPM
 rapids_cpm_init()
 
-# thrust before rmm/cuco so we get the right version of thrust/cub
-include(cmake/thirdparty/get_thrust.cmake)
-include(cmake/thirdparty/get_rmm.cmake)
-include(cmake/thirdparty/get_cutlass.cmake)
+if(NOT CPU_ONLY)
+  # thrust before rmm/cuco so we get the right version of thrust/cub
+  include(cmake/thirdparty/get_thrust.cmake)
+  include(cmake/thirdparty/get_rmm.cmake)
+  include(cmake/thirdparty/get_cutlass.cmake)
+endif()
 
 include(${rapids-cmake-dir}/cpm/cuco.cmake)
 rapids_cpm_cuco(BUILD_EXPORT_SET raft-exports INSTALL_EXPORT_SET raft-exports)
@@ -178,8 +187,10 @@ target_include_directories(
   raft INTERFACE "$<BUILD_INTERFACE:${RAFT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include>"
 )
 
-# Keep RAFT as lightweight as possible. Only CUDA libs and rmm should be used in global target.
-target_link_libraries(raft INTERFACE rmm::rmm cuco::cuco nvidia::cutlass::cutlass raft::Thrust)
+if(NOT CPU_ONLY)
+  # Keep RAFT as lightweight as possible. Only CUDA libs and rmm should be used in global target.
+  target_link_libraries(raft INTERFACE rmm::rmm cuco::cuco nvidia::cutlass::cutlass raft::Thrust)
+endif()
 
 target_compile_features(raft INTERFACE cxx_std_17 $<BUILD_INTERFACE:cuda_std_17>)
 target_compile_options(

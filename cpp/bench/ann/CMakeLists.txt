@@ -13,7 +13,7 @@
 # =============================================================================
 
 # ##################################################################################################
-# * compiler function -----------------------------------------------------------------------------
+# * benchmark options- -----------------------------------------------------------------------------
 
 option(RAFT_ANN_BENCH_USE_FAISS_BFKNN "Include faiss' brute-force knn algorithm in benchmark" ON)
 option(RAFT_ANN_BENCH_USE_FAISS_IVF_FLAT "Include faiss' ivf flat algorithm in benchmark" ON)
@@ -23,6 +23,9 @@ option(RAFT_ANN_BENCH_USE_RAFT_IVF_PQ "Include raft's ivf pq algorithm in benchm
 option(RAFT_ANN_BENCH_USE_RAFT_CAGRA "Include raft's CAGRA in benchmark" ON)
 option(RAFT_ANN_BENCH_USE_HNSWLIB "Include hnsw algorithm in benchmark" ON)
 option(RAFT_ANN_BENCH_USE_GGNN "Include ggnn algorithm in benchmark" ON)
+
+# ##################################################################################################
+# * Process options ----------------------------------------------------------
 
 find_package(Threads REQUIRED)
 
@@ -72,11 +75,24 @@ if(RAFT_ANN_BENCH_USE_RAFT_IVF_PQ
   set(RAFT_ANN_BENCH_USE_RAFT ON)
 endif()
 
+option(RAFT_ANN_BENCH_USE_MULTIGPU "Use multi-gpus (where possible) in benchmarks" OFF)
+
+message(VERBOSE "RAFT: Build ann-bench with FAISS_BFKNN: ${RAFT_ANN_BENCH_USE_FAISS_BFKNN}")
+message(VERBOSE "RAFT: Build ann-bench with FAISS_IVF_FLAT: ${RAFT_ANN_BENCH_USE_FAISS_IVF_FLAT}")
+message(VERBOSE "RAFT: Build ann-bench with FAISS_IVF_PQ: ${RAFT_ANN_BENCH_USE_FAISS_IVF_PQ}")
+message(VERBOSE "RAFT: Build ann-bench with RAFT_IVF_FLAT: ${RAFT_ANN_BENCH_USE_RAFT_IVF_FLAT}")
+message(VERBOSE "RAFT: Build ann-bench with RAFT_IVF_PQ: ${RAFT_ANN_BENCH_USE_RAFT_IVF_PQ}")
+message(VERBOSE "RAFT: Build ann-bench with RAFT_CAGRA: ${RAFT_ANN_BENCH_USE_RAFT_CAGRA}")
+message(VERBOSE "RAFT: Build ann-bench with HNSWLIB: ${RAFT_ANN_BENCH_USE_HNSWLIB}")
+message(VERBOSE "RAFT: Build ann-bench with GGNN: ${RAFT_ANN_BENCH_USE_GGNN}")
+message(VERBOSE "RAFT: Build ann-bench with MULTIGPU: ${RAFT_ANN_BENCH_USE_MULTIGPU}")
+
+# ##################################################################################################
+# * FEtch requirements -------------------------------------------------------------
+
 if(RAFT_ANN_BENCH_USE_HNSWLIB)
   include(cmake/thirdparty/get_hnswlib.cmake)
 endif()
-
-option(RAFT_ANN_BENCH_USE_MULTIGPU "Use multi-gpus (where possible) in benchmarks" OFF)
 
 include(cmake/thirdparty/get_nlohmann_json.cmake)
 
@@ -87,6 +103,9 @@ endif()
 if(RAFT_ANN_BENCH_USE_FAISS)
   include(cmake/thirdparty/get_faiss.cmake)
 endif()
+
+# ##################################################################################################
+# * Requirements -------------------------------------------------------------
 
 function(ConfigureAnnBench)
 

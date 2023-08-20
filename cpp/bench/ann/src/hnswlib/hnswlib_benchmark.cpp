@@ -115,6 +115,7 @@ std::unique_ptr<typename raft::bench::ann::ANN<T>::AnnSearchParam> create_search
 
 };  // namespace raft::bench::ann
 
+#define CPU_ONLY
 #include "../common/benchmark.hpp"
 
 int main(int argc, char** argv) { return raft::bench::ann::run_main(argc, argv); }

@@ -28,7 +28,7 @@ function(find_and_configure_hnswlib)
 
     endif ()
 
-    include(../../cmake/modules/FindAVX.cmake)
+    include(cmake/modules/FindAVX.cmake)
 
     set(HNSW_CXX_FLAGS "")
     if(CXX_AVX_FOUND)
