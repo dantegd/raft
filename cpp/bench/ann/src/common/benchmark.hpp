@@ -169,8 +169,10 @@ inline void write_build_info(const std::string& file_prefix,
 template <typename T>
 void build(const Dataset<T>* dataset, const std::vector<Configuration::Index>& indices)
 {
+#ifndef CPU_ONLY
   cudaStream_t stream;
   RAFT_CUDA_TRY(cudaStreamCreate(&stream));
+#endif
 
   log_info(
     "base set from dataset '%s', #vector = %zu", dataset->name().c_str(), dataset->base_set_size());
@@ -198,20 +200,28 @@ void build(const Dataset<T>* dataset, const std::vector<Configuration::Index>& i
     }
 
     log_info("building index '%s'", index.name.c_str());
+#ifndef CPU_ONLY
     RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+#endif
+
 #ifdef NVTX
     nvtxRangePush("build");
 #endif
     Timer timer;
     algo->build(base_set_ptr, dataset->base_set_size(), stream);
+#ifndef CPU_ONLY
     RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+#endif
+
     const float elapsed_ms = timer.elapsed_ms();
 #ifdef NVTX
     nvtxRangePop();
 #endif
     log_info("built index in %.2f seconds", elapsed_ms / 1000.0f);
+#ifndef CPU_ONLY
     RAFT_CUDA_TRY(cudaDeviceSynchronize());
     RAFT_CUDA_TRY(cudaPeekAtLastError());
+#endif
 
     algo->save(index.file);
     write_build_info(index.file,
@@ -224,7 +234,9 @@ void build(const Dataset<T>* dataset, const std::vector<Configuration::Index>& i
     log_info("saved index to %s", index.file.c_str());
   }
 
+#ifndef CPU_ONLY
   RAFT_CUDA_TRY(cudaStreamDestroy(stream));
+#endif
 }
 
 inline void write_search_result(const std::string& file_prefix,
@@ -281,8 +293,10 @@ template <typename T>
 inline void search(const Dataset<T>* dataset, const std::vector<Configuration::Index>& indices)
 {
   if (indices.empty()) { return; }
+#ifndef CPU_ONLY
   cudaStream_t stream;
   RAFT_CUDA_TRY(cudaStreamCreate(&stream));
+#endif
 
   log_info("loading query set from dataset '%s', #vector = %zu",
            dataset->name().c_str(),
@@ -312,8 +326,10 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
   search_times.reserve(num_batches);
   std::size_t* d_neighbors;
   float* d_distances;
+#ifndef CPU_ONLY
   RAFT_CUDA_TRY(cudaMalloc((void**)&d_neighbors, query_set_size * k * sizeof(*d_neighbors)));
   RAFT_CUDA_TRY(cudaMalloc((void**)&d_distances, query_set_size * k * sizeof(*d_distances)));
+#endif
 
   for (const auto& index : indices) {
     log_info("creating algo '%s', param=%s", index.algo.c_str(), index.build_param.dump().c_str());
@@ -361,8 +377,10 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
       log_info("search with param: %s", index.search_params[i].dump().c_str());
 
       if (algo_property.query_memory_type == MemoryType::Device) {
+#ifndef CPU_ONLY
         RAFT_CUDA_TRY(cudaMemset(d_neighbors, 0, query_set_size * k * sizeof(*d_neighbors)));
         RAFT_CUDA_TRY(cudaMemset(d_distances, 0, query_set_size * k * sizeof(*d_distances)));
+#endif
       } else {
         memset(neighbors, 0, query_set_size * k * sizeof(*neighbors));
         memset(distances, 0, query_set_size * k * sizeof(*distances));
@@ -378,7 +396,9 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
           const std::size_t row = batch_id * batch_size;
           const std::size_t actual_batch_size =
             (batch_id == num_batches - 1) ? query_set_size - row : batch_size;
+#ifndef CPU_ONLY
           RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+#endif
 #ifdef NVTX
           string nvtx_label = "batch" + to_string(batch_id);
           if (run_count != 1) { nvtx_label = "run" + to_string(run) + "-" + nvtx_label; }
@@ -397,7 +417,9 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
                        this_neighbors + row * k,
                        this_distances + row * k,
                        stream);
+#ifndef CPU_ONLY
           RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+#endif
           const float elapsed_ms = timer.elapsed_ms();
 #ifdef NVTX
           nvtxRangePop();
@@ -434,12 +456,15 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
         }
         search_times.clear();
       }
+#ifndef CPU_ONLY
       RAFT_CUDA_TRY(cudaDeviceSynchronize());
       RAFT_CUDA_TRY(cudaPeekAtLastError());
+#endif
       const auto query_per_second =
         (run_count * raft::round_down_safe(query_set_size, batch_size)) / total_search_time;
 
       if (algo_property.query_memory_type == MemoryType::Device) {
+#ifndef CPU_ONLY
         RAFT_CUDA_TRY(cudaMemcpy(neighbors,
                                  d_neighbors,
                                  query_set_size * k * sizeof(*d_neighbors),
@@ -449,6 +474,7 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
                                  query_set_size * k * sizeof(*d_distances),
                                  cudaMemcpyDeviceToHost));
       }
+#endif
 
       for (std::size_t j = 0; j < query_set_size * k; ++j) {
         neighbors_buf[j] = neighbors[j];
@@ -477,9 +503,11 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
   delete[] neighbors;
   delete[] neighbors_buf;
   delete[] distances;
+#ifndef CPU_ONLY
   RAFT_CUDA_TRY(cudaFree(d_neighbors));
   RAFT_CUDA_TRY(cudaFree(d_distances));
   RAFT_CUDA_TRY(cudaStreamDestroy(stream));
+#endif
 }
 
 inline const std::string usage(const string& argv0)
