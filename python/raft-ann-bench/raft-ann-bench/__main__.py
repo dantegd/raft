@@ -75,7 +75,7 @@ def run_build_and_search(conf_filename, conf_file, executables_to_run,
         os.remove(temp_conf_filepath)
 
 
-def main():
+def main(conf_file=None):
     scripts_path = os.path.dirname(os.path.realpath(__file__))
     # Read list of allowed algorithms
     with open(f"{scripts_path}/algos.yaml", "r") as f:
