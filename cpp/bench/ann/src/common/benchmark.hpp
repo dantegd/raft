@@ -413,14 +413,20 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
 #ifdef NVTX
           nvtxRangePush(nvtx_label.c_str());
 #endif
+#ifndef CPU_ONLY
           algo->search(this_query_set + row * dataset->dim(),
                        actual_batch_size,
                        k,
                        this_neighbors + row * k,
                        this_distances + row * k,
                        stream);
-#ifndef CPU_ONLY
           RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+#else
+          algo->search(this_query_set + row * dataset->dim(),
+                       actual_batch_size,
+                       k,
+                       this_neighbors + row * k,
+                       this_distances + row * k);
 #endif
           const float elapsed_ms = timer.elapsed_ms();
 #ifdef NVTX
