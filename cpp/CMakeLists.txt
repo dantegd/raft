@@ -164,10 +164,10 @@ if(NOT CPU_ONLY)
   include(cmake/thirdparty/get_thrust.cmake)
   include(cmake/thirdparty/get_rmm.cmake)
   include(cmake/thirdparty/get_cutlass.cmake)
-endif()
 
-include(${rapids-cmake-dir}/cpm/cuco.cmake)
-rapids_cpm_cuco(BUILD_EXPORT_SET raft-exports INSTALL_EXPORT_SET raft-exports)
+  include(${rapids-cmake-dir}/cpm/cuco.cmake)
+  rapids_cpm_cuco(BUILD_EXPORT_SET raft-exports INSTALL_EXPORT_SET raft-exports)
+endif()
 
 if(BUILD_TESTS)
   include(cmake/thirdparty/get_gtest.cmake)

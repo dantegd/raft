@@ -208,9 +208,11 @@ void build(const Dataset<T>* dataset, const std::vector<Configuration::Index>& i
     nvtxRangePush("build");
 #endif
     Timer timer;
-    algo->build(base_set_ptr, dataset->base_set_size(), stream);
 #ifndef CPU_ONLY
+    algo->build(base_set_ptr, dataset->base_set_size(), stream);
     RAFT_CUDA_TRY(cudaStreamSynchronize(stream));
+#else
+    algo->build(base_set_ptr, dataset->base_set_size());
 #endif
 
     const float elapsed_ms = timer.elapsed_ms();
