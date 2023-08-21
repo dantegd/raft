@@ -517,6 +517,7 @@ inline void search(const Dataset<T>* dataset, const std::vector<Configuration::I
   RAFT_CUDA_TRY(cudaStreamDestroy(stream));
 #endif
 }
+}
 
 inline const std::string usage(const string& argv0)
 {
