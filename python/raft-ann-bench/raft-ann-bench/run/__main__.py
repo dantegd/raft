@@ -15,6 +15,7 @@
 
 import argparse
 import json
+import logging
 import os
 import subprocess
 import yaml
@@ -75,8 +76,9 @@ def run_build_and_search(conf_filename, conf_file, executables_to_run,
         os.remove(temp_conf_filepath)
 
 
-def main(conf_file=None):
+def main():
     scripts_path = os.path.dirname(os.path.realpath(__file__))
+    call_path = os.getcwd()
     # Read list of allowed algorithms
     with open(f"{scripts_path}/algos.yaml", "r") as f:
         algos_conf = yaml.safe_load(f)
@@ -90,13 +92,12 @@ def main(conf_file=None):
     parser.add_argument(
         "--dataset",
         help="dataset whose configuration file will be used",
-        default="glove-100-inner"
+        default="glove-100-inner",
     )
     parser.add_argument(
         "--dataset-path",
         help="path to dataset folder",
-        default=os.path.join(os.getenv("RAFT_HOME"), 
-                             "bench", "ann", "data")
+        default=os.getenv("RAFT_ANN_DATA_HOME")
     )
     parser.add_argument(
         "--build",
@@ -120,6 +121,9 @@ def main(conf_file=None):
                         action="store_true")
 
     args = parser.parse_args()
+
+    if args.dataset_path is None:
+        args.dataset_path = os.path.join(call_path, "datasets")
 
     # If both build and search are not provided,
     # run both
