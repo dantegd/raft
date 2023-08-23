@@ -15,6 +15,23 @@
 
 import argparse
 import os
+import subprocess
+
+
+def export_results(output_filepath, recompute, groundtruth_filepath,
+                   result_filepaths):
+    print(f"Writing output file to: {output_filepath}")
+    ann_bench_scripts_dir = os.path.join(os.getenv("RAFT_HOME"),
+                                         "cpp/bench/ann/scripts")
+    ann_bench_scripts_path = os.path.join(ann_bench_scripts_dir,
+                                          "eval.pl")
+    if recompute:
+        p = subprocess.Popen([ann_bench_scripts_path, "-f", "-o", output_filepath,
+                              groundtruth_filepath] + result_filepaths)
+    else:
+        p = subprocess.Popen([ann_bench_scripts_path, "-o", output_filepath,
+                              groundtruth_filepath] + result_filepaths)
+    p.wait()
 
 
 def main():
