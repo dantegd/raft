@@ -30,6 +30,13 @@ rapids-mamba-retry mambabuild \
   # --no-test \
   # --channel "${CPP_CHANNEL}" \
   # --channel "${RAPIDS_CONDA_BLD_OUTPUT_DIR}" \
-  # conda/recipes/raft-dask
+  # conda/recipes/raft-ann-bench
+
+if cuda_version == 12.0
+  # rapids-mamba-retry mambabuild \
+  # --no-test \
+  # --channel "${CPP_CHANNEL}" \
+  # --channel "${RAPIDS_CONDA_BLD_OUTPUT_DIR}" \
+  # conda/recipes/raft-ann-bench-cpu
 
 rapids-upload-conda-to-s3 python

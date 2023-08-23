@@ -80,6 +80,11 @@ def main():
     scripts_path = os.path.dirname(os.path.realpath(__file__))
     call_path = os.getcwd()
     # Read list of allowed algorithms
+    try:
+        import pylibraft
+        algo_file = "algos.yaml"
+    except ImportError:
+        algo_file = "algos_cpu.yaml"
     with open(f"{scripts_path}/algos.yaml", "r") as f:
         algos_conf = yaml.safe_load(f)
 

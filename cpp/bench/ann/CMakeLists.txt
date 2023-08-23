@@ -88,7 +88,7 @@ message(VERBOSE "RAFT: Build ann-bench with GGNN: ${RAFT_ANN_BENCH_USE_GGNN}")
 message(VERBOSE "RAFT: Build ann-bench with MULTIGPU: ${RAFT_ANN_BENCH_USE_MULTIGPU}")
 
 # ##################################################################################################
-# * FEtch requirements -------------------------------------------------------------
+# * Fetch requirements -------------------------------------------------------------
 
 if(RAFT_ANN_BENCH_USE_HNSWLIB)
   include(cmake/thirdparty/get_hnswlib.cmake)
@@ -105,12 +105,16 @@ if(RAFT_ANN_BENCH_USE_FAISS)
 endif()
 
 # ##################################################################################################
-# * Requirements -------------------------------------------------------------
+# * Configure tests -------------------------------------------------------------
 
 function(ConfigureAnnBench)
 
   set(oneValueArgs NAME)
   set(multiValueArgs PATH LINKS CXXFLAGS INCLUDES)
+
+  if(NOT CPU_ONLY)
+    set(GPU_BUILD ON)
+  endif()
 
   cmake_parse_arguments(
     ConfigureAnnBench "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN}
@@ -124,12 +128,12 @@ function(ConfigureAnnBench)
   )
   target_link_libraries(
     ${BENCH_NAME}
-    PRIVATE raft::raft
+    PRIVATE $<$<BOOL:GPU_BUILD>:raft::raft>
             nlohmann_json::nlohmann_json
-            $<$<BOOL:${RAFT_ANN_BENCH_USE_MULTIGPU}>:NCCL::NCCL>
+            $<$<BOOL:GPU_BUILD>:$<$<BOOL:${RAFT_ANN_BENCH_USE_MULTIGPU}>:NCCL::NCCL>>
             ${ConfigureAnnBench_LINKS}
             Threads::Threads
-            ${RAFT_CTK_MATH_DEPENDENCIES}
+            $<$<BOOL:GPU_BUILD>:${RAFT_CTK_MATH_DEPENDENCIES}>
             $<TARGET_NAME_IF_EXISTS:OpenMP::OpenMP_CXX>
             $<TARGET_NAME_IF_EXISTS:conda_env>
   )
