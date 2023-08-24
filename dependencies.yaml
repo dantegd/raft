@@ -26,7 +26,6 @@ files:
       - develop
       - cudatoolkit
       - nn_bench
-      - nn_bench_cuda
   test_cpp:
     output: none
     includes:
@@ -112,7 +111,7 @@ files:
     extras:
       table: project
     includes:
-      - nn_bench
+      - nn_bench_python
 channels:
   - rapidsai
   - rapidsai-nightly
@@ -182,14 +181,16 @@ dependencies:
           - nlohmann_json>=3.11.2
           - glog>=0.6.0
           - h5py>=3.8.0
+          - libfaiss>=1.7.1
+          - faiss-proc=*=cuda
           - matplotlib
           - pyyaml
-  nn_bench_cuda:
+  nn_bench_python:
     common:
       - output_types: [conda]
         packages:
-          - libfaiss>=1.7.1
-          - faiss-proc=*=cuda
+          - matplotlib
+          - pyyaml
 
   cudatoolkit:
     specific:
