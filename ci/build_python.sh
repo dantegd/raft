@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2022, NVIDIA CORPORATION.
+# Copyright (c) 2022-2023, NVIDIA CORPORATION.
 
 set -euo pipefail
 
@@ -26,17 +26,21 @@ rapids-mamba-retry mambabuild \
   --channel "${RAPIDS_CONDA_BLD_OUTPUT_DIR}" \
   conda/recipes/raft-dask
 
-  # rapids-mamba-retry mambabuild \
-  # --no-test \
-  # --channel "${CPP_CHANNEL}" \
-  # --channel "${RAPIDS_CONDA_BLD_OUTPUT_DIR}" \
-  # conda/recipes/raft-ann-bench
+# Build ann-bench for each cuda and python version
+rapids-mamba-retry mambabuild \
+--no-test \
+--channel "${CPP_CHANNEL}" \
+--channel "${RAPIDS_CONDA_BLD_OUTPUT_DIR}" \
+conda/recipes/raft-ann-bench
 
-if cuda_version == 12.0
-  # rapids-mamba-retry mambabuild \
-  # --no-test \
-  # --channel "${CPP_CHANNEL}" \
-  # --channel "${RAPIDS_CONDA_BLD_OUTPUT_DIR}" \
-  # conda/recipes/raft-ann-bench-cpu
+# Build ann-bench-cpu only in CUDA 12 jobs since it only depends on python
+# version
+if [[ ${CUDA_VERSION} == "12.0.1" ]]; then
+  rapids-mamba-retry mambabuild \
+  --no-test \
+  --channel "${CPP_CHANNEL}" \
+  --channel "${RAPIDS_CONDA_BLD_OUTPUT_DIR}" \
+  conda/recipes/raft-ann-bench-cpu
+fi
 
 rapids-upload-conda-to-s3 python

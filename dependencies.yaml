@@ -26,6 +26,7 @@ files:
       - develop
       - cudatoolkit
       - nn_bench
+      - nn_bench_cuda
   test_cpp:
     output: none
     includes:
@@ -98,6 +99,20 @@ files:
       key: test
     includes:
       - test_python_common
+  py_build_raft_ann_bench:
+    output: pyproject
+    pyproject_dir: python/raft-ann-bench
+    extras:
+      table: build-system
+    includes:
+      - build_wheels
+  py_run_raft_ann_bench:
+    output: pyproject
+    pyproject_dir: python/raft-ann-bench
+    extras:
+      table: project
+    includes:
+      - nn_bench
 channels:
   - rapidsai
   - rapidsai-nightly
@@ -161,16 +176,20 @@ dependencies:
           - clang-tools=16.0.1
   nn_bench:
     common:
-      - output_types: [conda]
+      - output_types: [conda, pyproject, requirements]
         packages:
           - hnswlib=0.7.0
           - nlohmann_json>=3.11.2
           - glog>=0.6.0
           - h5py>=3.8.0
-          - libfaiss>=1.7.1
-          - faiss-proc=*=cuda
           - matplotlib
           - pyyaml
+  nn_bench_cuda:
+    common:
+      - output_types: [conda]
+        packages:
+          - libfaiss>=1.7.1
+          - faiss-proc=*=cuda
 
   cudatoolkit:
     specific:
