@@ -31,8 +31,9 @@ WORKDIR /raft
 
 # RUN printenv
 
-RUN git apply docker/bench/ann/patches/conda_aws_creds.patch \
-    ci/build_cpp.sh
+RUN git apply docker/bench/ann/patches/conda_aws_creds.patch
+
+RUN ci/build_cpp.sh
 # RUN rapids-mamba-retry mambabuild conda/recipes/libraft
 
 # RUN ci/build_python.sh
