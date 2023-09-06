@@ -18,12 +18,13 @@ ARG RAFT_BRANCH
 ARG RAFT_FORK
 
 RUN git clone https://github.com/${RAFT_FORK}/raft.git -b ${RAFT_BRANCH}
+WORKDIR /raft
 
 # workflow for building from source
 # ARG CI=false
 # ARG RAPIDS_ARTIFACTS_DIR=""
 
-# WORKDIR /raft
+
 
 # RUN git apply docker/bench/ann/patches/conda_aws_creds.patch
 
@@ -33,7 +34,7 @@ RUN git clone https://github.com/${RAFT_FORK}/raft.git -b ${RAFT_BRANCH}
 
 # workflow for building using conda packages
 
-RUN rapids-mamba-retry install raft-ann-bench=${RAPIDS_VER}
+RUN rapids-mamba-retry install raft-ann-bench=${RAPIDS_VER} -y
 
 # should we provide some datasets pre-baked in the container, or a container with datasets already?
 
