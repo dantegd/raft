@@ -3,5 +3,5 @@
 
 python -m raft-ann-bench.get_dataset $1
 
-python -m raft-ann-bench.run $1
+python -m raft-ann-bench.run $1 $2
 

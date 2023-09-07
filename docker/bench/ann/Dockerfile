@@ -39,7 +39,7 @@ WORKDIR /raft
 
 RUN ["chmod", "+x", "docker/bench/ann/scripts/run.sh"]
 
-CMD ["--dataset", "fashion-mnist-784-euclidean"]
+CMD ["--dataset fashion-mnist-784-euclidean", "--algorithms hnswlib"]
 
 ENTRYPOINT ["docker/bench/ann/scripts/run.sh"]
 
