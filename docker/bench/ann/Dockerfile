@@ -17,6 +17,9 @@ ARG RAPIDS_VER
 ARG RAFT_BRANCH
 ARG RAFT_FORK
 
+RUN rapids-mamba-retry install raft-ann-bench=${RAPIDS_VER} pylibraft=${RAPIDS_VER} -y
+
+ARG CACHEBUST=1
 RUN git clone https://github.com/${RAFT_FORK}/raft.git -b ${RAFT_BRANCH}
 WORKDIR /raft
 
@@ -32,13 +35,11 @@ WORKDIR /raft
 
 # workflow for building using conda packages
 
-RUN rapids-mamba-retry install raft-ann-bench=${RAPIDS_VER} -y
-
 # should we provide some datasets pre-baked in the container, or a container with datasets already?
 
 RUN ["chmod", "+x", "docker/bench/ann/scripts/run.sh"]
 
-CMD ["fashion-mnist-784-euclidean"]
+CMD ["--dataset", "fashion-mnist-784-euclidean"]
 
 ENTRYPOINT ["docker/bench/ann/scripts/run.sh"]
 
