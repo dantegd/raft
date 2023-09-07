@@ -24,8 +24,6 @@ WORKDIR /raft
 # ARG CI=false
 # ARG RAPIDS_ARTIFACTS_DIR=""
 
-
-
 # RUN git apply docker/bench/ann/patches/conda_aws_creds.patch
 
 # RUN ci/build_cpp.sh
@@ -37,6 +35,10 @@ WORKDIR /raft
 RUN rapids-mamba-retry install raft-ann-bench=${RAPIDS_VER} -y
 
 # should we provide some datasets pre-baked in the container, or a container with datasets already?
+
+RUN ["chmod", "+x", "docker/bench/ann/scripts/run.sh"]
+
+CMD ["fashion-mnist-784-euclidean"]
 
 ENTRYPOINT ["docker/bench/ann/scripts/run.sh"]
 
